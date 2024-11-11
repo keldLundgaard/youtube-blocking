@@ -5,9 +5,8 @@
 #################################################################################
 PROJECT_DIR=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 PROJECT_NAME=$(shell basename $(PROJECT_DIR))
-PYTHONVERSION=$(shell cat pyversion)
-VENV_DIR=.venv
-PYTHON=3.10
+PYTHONVERSION=3.10
+VENV_DIR=.venv-"$(PROJECT_NAME)"
 PIP=$(VENV_DIR)/bin/pip
 
 #################################################################################
@@ -29,13 +28,15 @@ create_environment:
 sync-project-configs:
 	@echo "Updating project configurations..."
 	@if [ -f pyproject.toml ]; then \
-		sed -i.bak \
-			-e 's/^name = ".*"/name = "$(PROJECT_NAME)"/' \
-			-e 's/^requires-python = ">=.*"/requires-python = ">='"$(PYTHONVERSION)"'"/' \
-			-e 's/^python_version = ".*"/python_version = "'"$(PYTHONVERSION)"'"/' \
-			-e 's/target-version = \['\''py[0-9]*'\''\]/target-version = ['\''py'"$(shell echo $(PYTHONVERSION) | sed 's/\.[0-9]*$$//')"'\'']/' \
+		cp pyproject.toml pyproject.toml.bak && \
+		sed -i.tmp \
+			-e 's/PROJECT_NAME_PLACEHOLDER/$(PROJECT_NAME)/' \
+			-e 's/PYTHON_VERSION_PLACEHOLDER/$(PYTHONVERSION)/' \
+			-e 's/pyPYVERSION_SHORT/py'"$(shell echo $(PYTHONVERSION) | sed 's/\.[0-9]*$$//')"'/' \
 			pyproject.toml && \
-		rm -f pyproject.toml.bak; \
+		rm -f pyproject.toml.tmp && \
+		echo "Successfully updated pyproject.toml" || \
+		{ echo "Error updating pyproject.toml"; mv pyproject.toml.bak pyproject.toml; exit 1; }; \
 	else \
 		echo "pyproject.toml not found!"; \
 		exit 1; \
