@@ -6,7 +6,7 @@
 PROJECT_DIR=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 PROJECT_NAME=$(shell basename $(PROJECT_DIR))
 PYTHONVERSION=3.10
-VENV_DIR=.venv-"$(PROJECT_NAME)"
+VENV_DIR=.venv-$(PROJECT_NAME)  # Using standard characters
 PIP=$(VENV_DIR)/bin/pip
 
 #################################################################################
